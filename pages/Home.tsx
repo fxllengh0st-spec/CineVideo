@@ -58,13 +58,6 @@ const Home: React.FC = () => {
       <div className="min-h-screen flex items-center justify-center flex-col gap-4 text-center px-4">
         <h2 className="text-3xl font-bold text-red-600">Erro na conexão</h2>
         <p className="text-zinc-400 max-w-md">{error}</p>
-        {isApiKeyMissing() && (
-             <div className="bg-zinc-900 p-4 rounded border border-yellow-600/50 text-yellow-500 text-sm font-mono text-left">
-                <strong>Action Required:</strong><br/>
-                Open <code>src/services/api.ts</code><br/>
-                Replace <code>YOUR_TMDB_API_KEY_HERE</code> with a valid key.
-             </div>
-        )}
       </div>
     );
   }
@@ -86,39 +79,22 @@ const Home: React.FC = () => {
     >
       <HeroSection movie={heroMovie} />
       
-      <div className="-mt-32 relative z-10 space-y-4">
-        <motion.div
-          {...({
-            initial: { opacity: 0, y: 50 },
-            whileInView: { opacity: 1, y: 0 },
-            viewport: { once: true, margin: "-50px" },
-            transition: { duration: 0.6, delay: 0.1 }
-          } as any)}
-        >
-          <SectionSlider title="Em Alta nesta Semana" movies={trending} />
-        </motion.div>
-
-        <motion.div
-          {...({
-            initial: { opacity: 0, y: 50 },
-            whileInView: { opacity: 1, y: 0 },
-            viewport: { once: true, margin: "-50px" },
-            transition: { duration: 0.6, delay: 0.2 }
-          } as any)}
-        >
-          <SectionSlider title="Aclamados pela Crítica" movies={topRated} />
-        </motion.div>
-
-        <motion.div
-          {...({
-            initial: { opacity: 0, y: 50 },
-            whileInView: { opacity: 1, y: 0 },
-            viewport: { once: true, margin: "-50px" },
-            transition: { duration: 0.6, delay: 0.3 }
-          } as any)}
-        >
-          <SectionSlider title="Chegando aos Cinemas" movies={upcoming} />
-        </motion.div>
+      <div className="-mt-20 relative z-10 space-y-4 pb-10">
+        <SectionSlider 
+            title="Em Alta nesta Semana" 
+            movies={trending} 
+            categoryPath="/category/trending"
+        />
+        <SectionSlider 
+            title="Aclamados pela Crítica" 
+            movies={topRated} 
+            categoryPath="/category/top_rated"
+        />
+        <SectionSlider 
+            title="Chegando aos Cinemas" 
+            movies={upcoming} 
+            categoryPath="/category/upcoming"
+        />
       </div>
     </motion.div>
   );

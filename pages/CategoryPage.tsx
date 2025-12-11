@@ -1,51 +1,76 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
-import { searchMovies } from '../services/api';
+import { useParams } from 'react-router-dom';
+import { getTrendingMovies, getTopRatedMovies, getUpcomingMovies } from '../services/api';
 import { Movie } from '../types';
 import MovieCard from '../components/MovieCard';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-const SearchResults: React.FC = () => {
-  const location = useLocation();
-  const query = new URLSearchParams(location.search).get('q');
+const CategoryPage: React.FC = () => {
+  const { type } = useParams<{ type: string }>();
   
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
-  // Reset page when query changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [query]);
+  // Mapeamento de títulos e funções API
+  const categoryConfig: Record<string, { title: string; fetcher: (page: number) => Promise<any> }> = {
+    trending: {
+        title: "Em Alta nesta Semana",
+        fetcher: getTrendingMovies
+    },
+    top_rated: {
+        title: "Aclamados pela Crítica",
+        fetcher: getTopRatedMovies
+    },
+    upcoming: {
+        title: "Chegando aos Cinemas",
+        fetcher: getUpcomingMovies
+    }
+  };
+
+  const currentCategory = type && categoryConfig[type] ? categoryConfig[type] : null;
 
   useEffect(() => {
-    const fetchSearch = async () => {
-      if (!query) return;
+    // Reset page on category change
+    setCurrentPage(1);
+  }, [type]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!currentCategory) return;
+
       setLoading(true);
-      // Scroll to top when fetching new page
       window.scrollTo({ top: 0, behavior: 'smooth' });
       
       try {
-        const data = await searchMovies(query, currentPage);
+        const data = await currentCategory.fetcher(currentPage);
         setMovies(data.results);
-        setTotalPages(Math.min(data.total_pages, 500)); // TMDB limits to 500 pages
+        setTotalPages(Math.min(data.total_pages, 500));
       } catch (error) {
-        console.error("Search failed:", error);
+        console.error("Category fetch failed:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchSearch();
-  }, [query, currentPage]);
+    fetchData();
+  }, [type, currentPage, currentCategory]);
 
   const handlePageChange = (newPage: number) => {
     if (newPage >= 1 && newPage <= totalPages) {
       setCurrentPage(newPage);
     }
   };
+
+  if (!currentCategory) {
+      return (
+          <div className="min-h-screen pt-24 flex items-center justify-center">
+              <p className="text-zinc-500">Categoria não encontrada.</p>
+          </div>
+      );
+  }
 
   return (
     <motion.div 
@@ -57,14 +82,12 @@ const SearchResults: React.FC = () => {
         transition: { duration: 0.4 }
       } as any)}
     >
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">
-          Resultados para <span className="text-red-500">"{query}"</span>
+      <div className="mb-8 border-b border-white/10 pb-4">
+        <h1 className="text-3xl font-bold text-white mb-2">
+          {currentCategory.title}
         </h1>
-        <p className="text-zinc-400 mt-2">
-            {movies.length > 0 
-                ? `Página ${currentPage} de ${totalPages}.` 
-                : loading ? 'Pesquisando...' : 'Nenhum filme encontrado.'}
+        <p className="text-zinc-400">
+            Catálogo completo • Página {currentPage} de {totalPages}
         </p>
       </div>
 
@@ -111,7 +134,7 @@ const SearchResults: React.FC = () => {
               </button>
 
               <span className="text-zinc-400 font-medium text-sm">
-                Página <span className="text-white font-bold">{currentPage}</span> de {totalPages}
+                Página <span className="text-white font-bold">{currentPage}</span>
               </span>
 
               <button
@@ -129,4 +152,4 @@ const SearchResults: React.FC = () => {
   );
 };
 
-export default SearchResults;
+export default CategoryPage;

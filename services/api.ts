@@ -24,18 +24,18 @@ export const isApiKeyMissing = () => false;
 // ENDPOINTS
 // -----------------------------------------------------------------------------
 
-export const getTrendingMovies = async () => {
-  const response = await api.get('/trending/movie/week');
+export const getTrendingMovies = async (page: number = 1) => {
+  const response = await api.get('/trending/movie/week', { params: { page } });
   return response.data;
 };
 
-export const getTopRatedMovies = async () => {
-  const response = await api.get('/movie/top_rated');
+export const getTopRatedMovies = async (page: number = 1) => {
+  const response = await api.get('/movie/top_rated', { params: { page } });
   return response.data;
 };
 
-export const getUpcomingMovies = async () => {
-  const response = await api.get('/movie/upcoming');
+export const getUpcomingMovies = async (page: number = 1) => {
+  const response = await api.get('/movie/upcoming', { params: { page } });
   return response.data;
 };
 
@@ -48,10 +48,11 @@ export const getMovieDetails = async (id: string) => {
   return response.data;
 };
 
-export const searchMovies = async (query: string) => {
+export const searchMovies = async (query: string, page: number = 1) => {
   const response = await api.get('/search/movie', {
     params: {
       query,
+      page,
     },
   });
   return response.data;

@@ -5,6 +5,7 @@ import Navbar from './components/Navbar';
 import Home from './pages/Home';
 import MovieDetails from './pages/MovieDetails';
 import SearchResults from './pages/SearchResults';
+import CategoryPage from './pages/CategoryPage';
 
 // Componente interno para acessar o hook useLocation dentro do Router
 const AnimatedRoutes: React.FC = () => {
@@ -16,6 +17,7 @@ const AnimatedRoutes: React.FC = () => {
         <Route path="/" element={<Home />} />
         <Route path="/movie/:id" element={<MovieDetails />} />
         <Route path="/search" element={<SearchResults />} />
+        <Route path="/category/:type" element={<CategoryPage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </AnimatePresence>
