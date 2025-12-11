@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, IMAGE_BASE_URL_ORIGINAL, IMAGE_BASE_URL_W500 } from '../services/api';
 import { Movie } from '../types';
-import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X, AlertCircle, ShieldCheck, ShieldAlert, Server, Shield, RefreshCw } from 'lucide-react';
+import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X, AlertCircle, Server, RefreshCw, ExternalLink } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const containerVariants = {
@@ -22,17 +22,28 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
 };
 
-// Configuração dos Servidores (Reordenados por estabilidade e taxa de sucesso)
+// Configuração dos Servidores - Priorizando estabilidade máxima
 const SERVER_LIST = [
-    // SuperEmbed é um agregador, geralmente tem a maior taxa de sucesso
-    { name: 'Opção 1 (Multi-Server)', getUrl: (id: number) => `https://multiembed.mov/?video_id=${id}&tmdb=1` },
-    { name: 'Opção 2 (VidSrc.to)', getUrl: (id: number) => `https://vidsrc.to/embed/movie/${id}` },
-    { name: 'Opção 3 (Embed.su)', getUrl: (id: number) => `https://embed.su/embed/movie/${id}` },
-    { name: 'Opção 4 (AutoEmbed)', getUrl: (id: number) => `https://autoembed.cc/embed/movie/${id}` },
-    { name: 'Opção 5 (VidLink)', getUrl: (id: number) => `https://vidlink.pro/movie/${id}` },
-    { name: 'Opção 6 (Smashy)', getUrl: (id: number) => `https://player.smashy.stream/movie/${id}` },
-    { name: 'Opção 7 (VidSrc.me)', getUrl: (id: number) => `https://vidsrc.me/embed/movie/${id}` },
-    { name: 'Opção 8 (VidSrc.icu)', getUrl: (id: number) => `https://vidsrc.icu/embed/movie/${id}` },
+    { 
+        name: 'Opção 1 (VidSrc - Estável)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://vidsrc.xyz/embed/movie/${tmdb}` 
+    },
+    { 
+        name: 'Opção 2 (VidLink - Rápido)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://vidlink.pro/movie/${tmdb}` 
+    },
+    { 
+        name: 'Opção 3 (SuperEmbed)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://multiembed.mov/?video_id=${tmdb}&tmdb=1` 
+    },
+    { 
+        name: 'Opção 4 (Embed.su - HD)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://embed.su/embed/movie/${tmdb}` 
+    },
+    { 
+        name: 'Opção 5 (2Embed)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://www.2embed.cc/embed/${tmdb}` 
+    }
 ];
 
 const MovieDetails: React.FC = () => {
@@ -44,11 +55,7 @@ const MovieDetails: React.FC = () => {
   // Player States
   const [showPlayer, setShowPlayer] = useState(false);
   const [selectedServerIndex, setSelectedServerIndex] = useState(0);
-  const [refreshKey, setRefreshKey] = useState(0); // Estado para forçar reload do iframe
-  
-  // AdBlock Logic
-  const [adBlockEnabled, setAdBlockEnabled] = useState(true);
-  const [showAdBlockToast, setShowAdBlockToast] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -73,15 +80,6 @@ const MovieDetails: React.FC = () => {
     };
   }, [id]);
 
-  // Efeito para notificar o usuário quando o player abre
-  useEffect(() => {
-    if (showPlayer && adBlockEnabled) {
-      setShowAdBlockToast(true);
-      const timer = setTimeout(() => setShowAdBlockToast(false), 4000);
-      return () => clearTimeout(timer);
-    }
-  }, [showPlayer, adBlockEnabled]);
-
   const handleShare = () => {
     const url = window.location.href;
     navigator.clipboard.writeText(url).then(() => {
@@ -92,6 +90,14 @@ const MovieDetails: React.FC = () => {
 
   const refreshPlayer = () => {
     setRefreshKey(prev => prev + 1);
+  };
+
+  const openInNewTab = () => {
+    if (movie) {
+        const currentServer = SERVER_LIST[selectedServerIndex];
+        const url = currentServer.getUrl(movie.id, movie.imdb_id);
+        window.open(url, '_blank');
+    }
   };
 
   if (loading) {
@@ -111,17 +117,8 @@ const MovieDetails: React.FC = () => {
     : 'https://via.placeholder.com/500x750?text=No+Poster';
 
   const currentServer = SERVER_LIST[selectedServerIndex];
-  const playerUrl = currentServer.getUrl(movie.id);
+  const playerUrl = currentServer.getUrl(movie.id, movie.imdb_id);
   const isReleased = new Date(movie.release_date) <= new Date();
-
-  // Lógica de Sandbox Dinâmico
-  // Alguns players exigem 'allow-storage-access-by-user-activation' para não quebrar
-  const baseSandbox = "allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-presentation allow-storage-access-by-user-activation";
-  
-  // Se AdBlock ativo, NÃO permitimos popups.
-  const sandboxAttributes = adBlockEnabled 
-    ? baseSandbox 
-    : `${baseSandbox} allow-popups allow-popups-to-escape-sandbox`;
 
   return (
     <motion.div 
@@ -144,21 +141,6 @@ const MovieDetails: React.FC = () => {
               exit: { opacity: 0 }
             } as any)}
           >
-            {/* AdBlock Notification Toast */}
-            <AnimatePresence>
-              {showAdBlockToast && (
-                <motion.div 
-                    initial={{ y: -50, opacity: 0 }}
-                    animate={{ y: 0, opacity: 1 }}
-                    exit={{ y: -50, opacity: 0 }}
-                    className="absolute top-8 left-0 right-0 mx-auto w-max z-50 flex items-center gap-2 bg-green-500/10 border border-green-500/50 text-green-400 px-4 py-2 rounded-full shadow-lg backdrop-blur-md pointer-events-none"
-                >
-                    <ShieldCheck className="w-4 h-4" />
-                    <span className="text-sm font-medium">CineShield Ativo: Popups bloqueados</span>
-                </motion.div>
-              )}
-            </AnimatePresence>
-
             <div className="w-full max-w-6xl flex flex-col gap-4 relative">
                 {/* Header do Player */}
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-white mb-2 gap-4">
@@ -167,34 +149,28 @@ const MovieDetails: React.FC = () => {
                            <Play className="w-5 h-5 text-red-600" />
                            <span className="truncate max-w-[200px] sm:max-w-md">{movie.title}</span>
                         </h3>
-                        <span className="text-xs text-zinc-400">Servidor Atual: <span className="text-white font-semibold">{currentServer.name}</span></span>
+                        <span className="text-xs text-zinc-400">
+                            Fonte: <span className="text-white font-semibold">{currentServer.name}</span>
+                        </span>
                     </div>
                     
                     <div className="flex items-center gap-3">
-                        {/* Botão de Toggle AdBlock */}
-                        <button
-                            onClick={() => {
-                                setAdBlockEnabled(!adBlockEnabled);
-                                if (!adBlockEnabled) setShowAdBlockToast(true);
-                            }}
-                            className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
-                                adBlockEnabled 
-                                ? 'bg-green-600/20 border-green-500/50 text-green-400 hover:bg-green-600/30' 
-                                : 'bg-red-600/20 border-red-500/50 text-red-400 hover:bg-red-600/30'
-                            }`}
-                            title={adBlockEnabled ? "Clique para desativar se o vídeo falhar" : "Clique para ativar proteção"}
+                         <button
+                            onClick={openInNewTab}
+                            className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-full text-zinc-400 hover:text-white transition-colors border border-white/5 text-xs font-medium"
+                            title="Caso o vídeo não carregue aqui"
                         >
-                            {adBlockEnabled ? <ShieldCheck className="w-4 h-4" /> : <ShieldAlert className="w-4 h-4" />}
-                            {adBlockEnabled ? 'AdBlock ON' : 'AdBlock OFF'}
+                            <ExternalLink className="w-3 h-3" />
+                            Abrir Externa
                         </button>
-
-                         {/* Botão de Reload */}
+                    
                          <button
                             onClick={refreshPlayer}
-                            className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-full text-zinc-400 hover:text-white transition-colors border border-white/5"
+                            className="flex items-center gap-2 px-3 py-1.5 bg-zinc-800 hover:bg-zinc-700 rounded-full text-zinc-400 hover:text-white transition-colors border border-white/5 text-xs font-medium"
                             title="Recarregar Player"
                         >
-                            <RefreshCw className="w-4 h-4" />
+                            <RefreshCw className="w-3 h-3" />
+                            Recarregar
                         </button>
 
                         <button 
@@ -208,27 +184,15 @@ const MovieDetails: React.FC = () => {
 
                 {/* Área do Iframe */}
                 <div className="w-full aspect-video bg-black relative shadow-2xl rounded-xl overflow-hidden ring-1 ring-white/10 group">
-                    
-                    {/* Overlay informativo (apenas visual) */}
-                    {adBlockEnabled && (
-                         <div className="absolute top-4 left-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-                            <div className="bg-black/80 backdrop-blur text-white text-[10px] px-2 py-1 rounded border border-white/10 flex items-center gap-1">
-                                <Shield className="w-3 h-3 text-green-500" />
-                                Protegido contra redirects
-                            </div>
-                         </div>
-                    )}
-
                     <iframe
-                        key={`${playerUrl}-${selectedServerIndex}-${adBlockEnabled}-${refreshKey}`} // Recarrega se URL, AdBlock ou Refresh mudar
+                        key={`${playerUrl}-${selectedServerIndex}-${refreshKey}`}
                         src={playerUrl}
                         className="w-full h-full"
                         allowFullScreen
-                        sandbox={sandboxAttributes}
+                        // REMOVIDO SANDBOX para evitar bloqueios de scripts/popups dos players
                         allow="autoplay; encrypted-media; picture-in-picture"
                         title={`Player: ${movie.title}`}
-                        // 'origin' é mais compatível que 'no-referrer' para players modernos, mas ainda protege path
-                        referrerPolicy="origin" 
+                        referrerPolicy="origin"
                     ></iframe>
                 </div>
 
@@ -239,7 +203,7 @@ const MovieDetails: React.FC = () => {
                     <div>
                         <div className="flex items-center gap-2 mb-2 text-zinc-400 text-sm">
                             <Server className="w-4 h-4" />
-                            <span>Opções de Player (Selecione outro caso falhe):</span>
+                            <span>Servidor:</span>
                         </div>
                         <div className="flex flex-wrap gap-2">
                             {SERVER_LIST.map((server, index) => (
@@ -258,17 +222,18 @@ const MovieDetails: React.FC = () => {
                         </div>
                     </div>
 
-                    {/* Aviso UX */}
-                    <div className="flex items-start gap-2 text-zinc-500 text-xs bg-black/20 p-2 rounded">
-                        <AlertCircle className="w-4 h-4 mt-0.5 text-zinc-400 shrink-0" />
+                    {/* Aviso de UX */}
+                    <div className="flex items-start gap-3 text-zinc-500 text-xs bg-zinc-950/50 border border-white/5 p-3 rounded">
+                        <AlertCircle className="w-5 h-5 text-zinc-400 shrink-0" />
                         <div>
-                            <p>
-                                <strong className="text-zinc-300">Dica:</strong> Se aparecer "Conexão Recusada" ou "Indisponível":
+                            <p className="text-zinc-300 font-medium mb-1">
+                                Dica de Reprodução
                             </p>
-                            <ul className="list-disc pl-4 mt-1 space-y-1 opacity-70">
-                                <li>Troque a <strong>Opção</strong> no menu acima.</li>
-                                <li>Se persistir, clique no botão <strong>AdBlock ON</strong> para desativar temporariamente (alguns players exigem isso).</li>
-                            </ul>
+                            <p className="opacity-80 leading-relaxed">
+                                Se a "Opção 1" não carregar, tente a "Opção 2" ou "Opção 3". 
+                                <br />
+                                Alguns servidores exigem que você feche anúncios antes de iniciar. Isso é normal em players gratuitos.
+                            </p>
                         </div>
                     </div>
                 </div>
