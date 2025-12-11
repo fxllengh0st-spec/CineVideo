@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, IMAGE_BASE_URL_ORIGINAL, IMAGE_BASE_URL_W500 } from '../services/api';
 import { Movie } from '../types';
-import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X, AlertCircle, ShieldCheck, ShieldAlert, Server, Shield } from 'lucide-react';
+import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X, AlertCircle, ShieldCheck, ShieldAlert, Server, Shield, RefreshCw } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const containerVariants = {
@@ -22,16 +22,17 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
 };
 
-// Configuração dos Servidores (Reordenados por estabilidade)
+// Configuração dos Servidores (Reordenados por estabilidade e taxa de sucesso)
 const SERVER_LIST = [
-    { name: 'Player 1 (VidSrc)', getUrl: (id: number) => `https://vidsrc.to/embed/movie/${id}` },
-    { name: 'Player 2 (AutoEmbed)', getUrl: (id: number) => `https://autoembed.cc/embed/movie/${id}` },
-    { name: 'Player 3 (VidSrc.me)', getUrl: (id: number) => `https://vidsrc.me/embed/movie/${id}` },
-    { name: 'Player 4 (Embed.su)', getUrl: (id: number) => `https://embed.su/embed/movie/${id}` },
-    { name: 'Player 5 (VidLink)', getUrl: (id: number) => `https://vidlink.pro/movie/${id}` },
-    { name: 'Player 6 (VidSrc.cc)', getUrl: (id: number) => `https://vidsrc.cc/v2/embed/movie/${id}` },
-    { name: 'Player 7 (VidSrc.dev)', getUrl: (id: number) => `https://vidsrc.dev/embed/movie/${id}` },
-    { name: 'Player 8 (VidSrc.icu)', getUrl: (id: number) => `https://vidsrc.icu/embed/movie/${id}` },
+    // SuperEmbed é um agregador, geralmente tem a maior taxa de sucesso
+    { name: 'Opção 1 (Multi-Server)', getUrl: (id: number) => `https://multiembed.mov/?video_id=${id}&tmdb=1` },
+    { name: 'Opção 2 (VidSrc.to)', getUrl: (id: number) => `https://vidsrc.to/embed/movie/${id}` },
+    { name: 'Opção 3 (Embed.su)', getUrl: (id: number) => `https://embed.su/embed/movie/${id}` },
+    { name: 'Opção 4 (AutoEmbed)', getUrl: (id: number) => `https://autoembed.cc/embed/movie/${id}` },
+    { name: 'Opção 5 (VidLink)', getUrl: (id: number) => `https://vidlink.pro/movie/${id}` },
+    { name: 'Opção 6 (Smashy)', getUrl: (id: number) => `https://player.smashy.stream/movie/${id}` },
+    { name: 'Opção 7 (VidSrc.me)', getUrl: (id: number) => `https://vidsrc.me/embed/movie/${id}` },
+    { name: 'Opção 8 (VidSrc.icu)', getUrl: (id: number) => `https://vidsrc.icu/embed/movie/${id}` },
 ];
 
 const MovieDetails: React.FC = () => {
@@ -43,6 +44,7 @@ const MovieDetails: React.FC = () => {
   // Player States
   const [showPlayer, setShowPlayer] = useState(false);
   const [selectedServerIndex, setSelectedServerIndex] = useState(0);
+  const [refreshKey, setRefreshKey] = useState(0); // Estado para forçar reload do iframe
   
   // AdBlock Logic
   const [adBlockEnabled, setAdBlockEnabled] = useState(true);
@@ -88,6 +90,10 @@ const MovieDetails: React.FC = () => {
     });
   };
 
+  const refreshPlayer = () => {
+    setRefreshKey(prev => prev + 1);
+  };
+
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-zinc-500">Carregando detalhes...</div>;
   }
@@ -109,12 +115,13 @@ const MovieDetails: React.FC = () => {
   const isReleased = new Date(movie.release_date) <= new Date();
 
   // Lógica de Sandbox Dinâmico
-  // allow-storage-access-by-user-activation ajuda na compatibilidade com alguns players
+  // Alguns players exigem 'allow-storage-access-by-user-activation' para não quebrar
   const baseSandbox = "allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-presentation allow-storage-access-by-user-activation";
+  
   // Se AdBlock ativo, NÃO permitimos popups.
   const sandboxAttributes = adBlockEnabled 
     ? baseSandbox 
-    : `${baseSandbox} allow-popups`;
+    : `${baseSandbox} allow-popups allow-popups-to-escape-sandbox`;
 
   return (
     <motion.div 
@@ -181,9 +188,18 @@ const MovieDetails: React.FC = () => {
                             {adBlockEnabled ? 'AdBlock ON' : 'AdBlock OFF'}
                         </button>
 
+                         {/* Botão de Reload */}
+                         <button
+                            onClick={refreshPlayer}
+                            className="p-2 bg-zinc-800 hover:bg-zinc-700 rounded-full text-zinc-400 hover:text-white transition-colors border border-white/5"
+                            title="Recarregar Player"
+                        >
+                            <RefreshCw className="w-4 h-4" />
+                        </button>
+
                         <button 
                             onClick={() => setShowPlayer(false)}
-                            className="p-2 bg-zinc-800 hover:bg-red-600 rounded-full text-white transition-colors"
+                            className="p-2 bg-zinc-800 hover:bg-red-600 rounded-full text-white transition-colors border border-white/5"
                         >
                             <X className="w-6 h-6" />
                         </button>
@@ -204,14 +220,15 @@ const MovieDetails: React.FC = () => {
                     )}
 
                     <iframe
-                        key={`${playerUrl}-${adBlockEnabled}`} // Recarrega se URL ou AdBlock mudar
+                        key={`${playerUrl}-${selectedServerIndex}-${adBlockEnabled}-${refreshKey}`} // Recarrega se URL, AdBlock ou Refresh mudar
                         src={playerUrl}
                         className="w-full h-full"
                         allowFullScreen
                         sandbox={sandboxAttributes}
                         allow="autoplay; encrypted-media; picture-in-picture"
                         title={`Player: ${movie.title}`}
-                        referrerPolicy="no-referrer"
+                        // 'origin' é mais compatível que 'no-referrer' para players modernos, mas ainda protege path
+                        referrerPolicy="origin" 
                     ></iframe>
                 </div>
 
@@ -246,11 +263,12 @@ const MovieDetails: React.FC = () => {
                         <AlertCircle className="w-4 h-4 mt-0.5 text-zinc-400 shrink-0" />
                         <div>
                             <p>
-                                <strong className="text-zinc-300">Dica:</strong> Se aparecer "Conexão Recusada" ou tela cinza, troque de Player acima.
+                                <strong className="text-zinc-300">Dica:</strong> Se aparecer "Conexão Recusada" ou "Indisponível":
                             </p>
-                            <p className="mt-1 opacity-70">
-                                Alguns servidores exigem que o AdBlock esteja OFF para carregar. Use o botão no topo se necessário.
-                            </p>
+                            <ul className="list-disc pl-4 mt-1 space-y-1 opacity-70">
+                                <li>Troque a <strong>Opção</strong> no menu acima.</li>
+                                <li>Se persistir, clique no botão <strong>AdBlock ON</strong> para desativar temporariamente (alguns players exigem isso).</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
