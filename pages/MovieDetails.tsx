@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, IMAGE_BASE_URL_ORIGINAL, IMAGE_BASE_URL_W500 } from '../services/api';
 import { Movie } from '../types';
-import { Star, Clock, Calendar, ArrowLeft } from 'lucide-react';
+import { Star, Clock, Calendar, ArrowLeft, Share2, Check } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const containerVariants = {
@@ -26,6 +26,7 @@ const MovieDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -34,6 +35,7 @@ const MovieDetails: React.FC = () => {
       try {
         const data = await getMovieDetails(id);
         setMovie(data);
+        document.title = `${data.title} | CineVerse`; // Título dinâmico
         window.scrollTo(0, 0);
       } catch (error) {
         console.error("Error fetching details:", error);
@@ -43,7 +45,20 @@ const MovieDetails: React.FC = () => {
     };
 
     fetchDetails();
+    
+    // Cleanup title on unmount
+    return () => {
+        document.title = 'CineVerse - Discover Your Next Story';
+    };
   }, [id]);
+
+  const handleShare = () => {
+    const url = window.location.href;
+    navigator.clipboard.writeText(url).then(() => {
+        setCopied(true);
+        setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   if (loading) {
     return <div className="min-h-screen flex items-center justify-center text-zinc-500">Carregando detalhes...</div>;
@@ -98,9 +113,21 @@ const MovieDetails: React.FC = () => {
 
             {/* Info */}
             <div className="flex-1 pt-4 md:pt-20 text-center md:text-left">
-                <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl font-bold text-white mb-4 drop-shadow-lg">{movie.title}</motion.h1>
+                <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+                    <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl font-bold text-white mb-2 drop-shadow-lg">{movie.title}</motion.h1>
+                    
+                    {/* Share Button */}
+                    <motion.button
+                        variants={itemVariants}
+                        onClick={handleShare}
+                        className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-sm font-medium transition-all text-white backdrop-blur-md"
+                    >
+                        {copied ? <Check className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4" />}
+                        {copied ? 'Link Copiado!' : 'Compartilhar'}
+                    </motion.button>
+                </div>
                 
-                <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-zinc-300 mb-6">
+                <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-zinc-300 mb-6 mt-2">
                     <span className="flex items-center gap-1 text-yellow-500 font-bold bg-yellow-500/10 px-2 py-1 rounded">
                         <Star className="w-4 h-4 fill-yellow-500" />
                         {movie.vote_average.toFixed(1)}
@@ -130,6 +157,17 @@ const MovieDetails: React.FC = () => {
                     <h3 className="text-xl font-semibold text-white">Sinopse</h3>
                     <p className="text-zinc-300 leading-relaxed text-lg">{movie.overview || "Nenhuma sinopse disponível."}</p>
                 </motion.div>
+
+                {/* Mobile Share Button (Only visible on small screens) */}
+                <div className="md:hidden mt-6 flex justify-center">
+                    <button
+                        onClick={handleShare}
+                        className="flex items-center gap-2 px-6 py-3 bg-zinc-800 rounded-full text-white font-medium active:scale-95 transition-transform"
+                    >
+                        {copied ? <Check className="w-5 h-5 text-green-400" /> : <Share2 className="w-5 h-5" />}
+                        {copied ? 'Link Copiado!' : 'Compartilhar Filme'}
+                    </button>
+                </div>
             </div>
         </div>
 
