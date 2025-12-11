@@ -2,8 +2,8 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, IMAGE_BASE_URL_ORIGINAL, IMAGE_BASE_URL_W500 } from '../services/api';
 import { Movie } from '../types';
-import { Star, Clock, Calendar, ArrowLeft, Share2, Check } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -27,6 +27,7 @@ const MovieDetails: React.FC = () => {
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
+  const [showPlayer, setShowPlayer] = useState(false);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -84,6 +85,34 @@ const MovieDetails: React.FC = () => {
       animate="visible"
       exit="exit"
     >
+      {/* Player Modal Overlay */}
+      <AnimatePresence>
+        {showPlayer && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-8"
+          >
+            <div className="w-full max-w-7xl aspect-video bg-black relative shadow-2xl rounded-xl overflow-hidden ring-1 ring-white/10">
+              <button 
+                onClick={() => setShowPlayer(false)}
+                className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:bg-red-600 rounded-full text-white transition-all transform hover:scale-110"
+              >
+                <X className="w-6 h-6" />
+              </button>
+              <iframe
+                src={`https://vidsrc-embed.ru/embed/movie?tmdb=${movie.id}&autoplay=1`}
+                className="w-full h-full"
+                allowFullScreen
+                allow="autoplay; encrypted-media; picture-in-picture"
+                title={`Player: ${movie.title}`}
+              ></iframe>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Backdrop Header */}
       <motion.div className="relative h-[60vh] sm:h-[70vh] w-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}>
         <div className="absolute inset-0">
@@ -115,16 +144,6 @@ const MovieDetails: React.FC = () => {
             <div className="flex-1 pt-4 md:pt-20 text-center md:text-left">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
                     <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl font-bold text-white mb-2 drop-shadow-lg">{movie.title}</motion.h1>
-                    
-                    {/* Share Button */}
-                    <motion.button
-                        variants={itemVariants}
-                        onClick={handleShare}
-                        className="hidden md:flex items-center gap-2 px-4 py-2 bg-white/10 hover:bg-white/20 border border-white/10 rounded-full text-sm font-medium transition-all text-white backdrop-blur-md"
-                    >
-                        {copied ? <Check className="w-4 h-4 text-green-400" /> : <Share2 className="w-4 h-4" />}
-                        {copied ? 'Link Copiado!' : 'Compartilhar'}
-                    </motion.button>
                 </div>
                 
                 <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-zinc-300 mb-6 mt-2">
@@ -153,21 +172,29 @@ const MovieDetails: React.FC = () => {
                     ))}
                 </motion.div>
 
+                {/* Action Buttons */}
+                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 mb-8">
+                    <button 
+                        onClick={() => setShowPlayer(true)}
+                        className="flex items-center gap-3 px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-md transition-all transform hover:scale-105 shadow-lg shadow-red-900/20 w-full sm:w-auto justify-center"
+                    >
+                        <Play className="w-5 h-5 fill-white" />
+                        Assistir Filme
+                    </button>
+
+                    <button
+                        onClick={handleShare}
+                        className="flex items-center gap-2 px-6 py-3 bg-white/10 hover:bg-white/20 border border-white/10 rounded-md text-white font-medium transition-colors backdrop-blur-md w-full sm:w-auto justify-center"
+                    >
+                        {copied ? <Check className="w-5 h-5 text-green-400" /> : <Share2 className="w-5 h-5" />}
+                        {copied ? 'Link Copiado!' : 'Compartilhar'}
+                    </button>
+                </motion.div>
+
                 <motion.div variants={itemVariants} className="space-y-4 max-w-3xl">
                     <h3 className="text-xl font-semibold text-white">Sinopse</h3>
                     <p className="text-zinc-300 leading-relaxed text-lg">{movie.overview || "Nenhuma sinopse disponível."}</p>
                 </motion.div>
-
-                {/* Mobile Share Button (Only visible on small screens) */}
-                <div className="md:hidden mt-6 flex justify-center">
-                    <button
-                        onClick={handleShare}
-                        className="flex items-center gap-2 px-6 py-3 bg-zinc-800 rounded-full text-white font-medium active:scale-95 transition-transform"
-                    >
-                        {copied ? <Check className="w-5 h-5 text-green-400" /> : <Share2 className="w-5 h-5" />}
-                        {copied ? 'Link Copiado!' : 'Compartilhar Filme'}
-                    </button>
-                </div>
             </div>
         </div>
 
