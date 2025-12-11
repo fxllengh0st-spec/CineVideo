@@ -22,14 +22,14 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
 };
 
-// Configuração dos Servidores - Priorizando conteúdo PT-BR
+// Configuração dos Servidores - Priorizando conteúdo PT-BR e estabilidade
 const SERVER_LIST = [
     { 
-        name: 'Opção 1 (Dublado/Nacional)', 
-        getUrl: (tmdb: number, imdb?: string) => `https://embed.warezcdn.link/filme/${tmdb}` 
+        name: 'Opção 1 (SuperFlix - PT-BR)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://superflixapi.top/filme/${tmdb}` 
     },
     { 
-        name: 'Opção 2 (Multi-Audio)', 
+        name: 'Opção 2 (MultiEmbed - PT-BR)', 
         getUrl: (tmdb: number, imdb?: string) => `https://multiembed.mov/?video_id=${tmdb}&tmdb=1&lang=pt` 
     },
     { 
@@ -37,12 +37,12 @@ const SERVER_LIST = [
         getUrl: (tmdb: number, imdb?: string) => `https://vidsrc.xyz/embed/movie/${tmdb}?ds_lang=pt` 
     },
     { 
-        name: 'Opção 4 (Embed.su - HD)', 
-        getUrl: (tmdb: number, imdb?: string) => `https://embed.su/embed/movie/${tmdb}` 
+        name: 'Opção 4 (VidLink - Rápido)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://vidlink.pro/movie/${tmdb}` 
     },
     { 
-        name: 'Opção 5 (VidLink)', 
-        getUrl: (tmdb: number, imdb?: string) => `https://vidlink.pro/movie/${tmdb}` 
+        name: 'Opção 5 (Embedder)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://embedder.net/e/movie?tmdb=${tmdb}` 
     }
 ];
 
@@ -230,7 +230,8 @@ const MovieDetails: React.FC = () => {
                                 Preferência de Áudio (Dublado/Legendado)
                             </p>
                             <p className="opacity-80 leading-relaxed">
-                                A <b>Opção 1</b> prioriza áudio em Português. Nas outras opções, procure pelo ícone de <b>Engrenagem</b> ou <b>Bandeira</b> dentro do player para alternar o áudio/legenda.
+                                A <b>Opção 1</b> e <b>2</b> priorizam áudio em Português. <br/>
+                                Caso a opção selecionada falhe, tente as próximas da lista. Players gratuitos podem ter instabilidade momentânea.
                             </p>
                         </div>
                     </div>
