@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, IMAGE_BASE_URL_ORIGINAL, IMAGE_BASE_URL_W500 } from '../services/api';
 import { Movie } from '../types';
-import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X, AlertCircle, Server, RefreshCw, ExternalLink } from 'lucide-react';
+import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X, AlertCircle, Server, RefreshCw, ExternalLink, Volume2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const containerVariants = {
@@ -22,27 +22,27 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
 };
 
-// Configuração dos Servidores - Priorizando estabilidade máxima
+// Configuração dos Servidores - Priorizando conteúdo PT-BR
 const SERVER_LIST = [
     { 
-        name: 'Opção 1 (VidSrc - Estável)', 
-        getUrl: (tmdb: number, imdb?: string) => `https://vidsrc.xyz/embed/movie/${tmdb}` 
+        name: 'Opção 1 (Dublado/Nacional)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://embed.warezcdn.link/filme/${tmdb}` 
     },
     { 
-        name: 'Opção 2 (VidLink - Rápido)', 
-        getUrl: (tmdb: number, imdb?: string) => `https://vidlink.pro/movie/${tmdb}` 
+        name: 'Opção 2 (Multi-Audio)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://multiembed.mov/?video_id=${tmdb}&tmdb=1&lang=pt` 
     },
     { 
-        name: 'Opção 3 (SuperEmbed)', 
-        getUrl: (tmdb: number, imdb?: string) => `https://multiembed.mov/?video_id=${tmdb}&tmdb=1` 
+        name: 'Opção 3 (VidSrc - Estável)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://vidsrc.xyz/embed/movie/${tmdb}?ds_lang=pt` 
     },
     { 
         name: 'Opção 4 (Embed.su - HD)', 
         getUrl: (tmdb: number, imdb?: string) => `https://embed.su/embed/movie/${tmdb}` 
     },
     { 
-        name: 'Opção 5 (2Embed)', 
-        getUrl: (tmdb: number, imdb?: string) => `https://www.2embed.cc/embed/${tmdb}` 
+        name: 'Opção 5 (VidLink)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://vidlink.pro/movie/${tmdb}` 
     }
 ];
 
@@ -224,15 +224,13 @@ const MovieDetails: React.FC = () => {
 
                     {/* Aviso de UX */}
                     <div className="flex items-start gap-3 text-zinc-500 text-xs bg-zinc-950/50 border border-white/5 p-3 rounded">
-                        <AlertCircle className="w-5 h-5 text-zinc-400 shrink-0" />
+                        <Volume2 className="w-5 h-5 text-cyan-400 shrink-0" />
                         <div>
                             <p className="text-zinc-300 font-medium mb-1">
-                                Dica de Reprodução
+                                Preferência de Áudio (Dublado/Legendado)
                             </p>
                             <p className="opacity-80 leading-relaxed">
-                                Se a "Opção 1" não carregar, tente a "Opção 2" ou "Opção 3". 
-                                <br />
-                                Alguns servidores exigem que você feche anúncios antes de iniciar. Isso é normal em players gratuitos.
+                                A <b>Opção 1</b> prioriza áudio em Português. Nas outras opções, procure pelo ícone de <b>Engrenagem</b> ou <b>Bandeira</b> dentro do player para alternar o áudio/legenda.
                             </p>
                         </div>
                     </div>

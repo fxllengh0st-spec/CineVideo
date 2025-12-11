@@ -14,6 +14,7 @@ const api = axios.create({
   params: {
     api_key: API_KEY,
     language: 'pt-BR',
+    include_image_language: 'pt,br,en,null', // Prioriza imagens com texto em PT
   },
 });
 
