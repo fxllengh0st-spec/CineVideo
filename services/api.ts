@@ -3,9 +3,7 @@ import axios from 'axios';
 // -----------------------------------------------------------------------------
 // CONFIGURATION
 // -----------------------------------------------------------------------------
-// Replace the string below with your actual TMDB API Key.
-// You can get one at https://www.themoviedb.org/settings/api
-const API_KEY = "YOUR_TMDB_API_KEY_HERE"; 
+const API_KEY: string = "f73f3b8c0f5848633785c02154fd2a7c";
 
 const BASE_URL = 'https://api.themoviedb.org/3';
 export const IMAGE_BASE_URL_ORIGINAL = 'https://image.tmdb.org/t/p/original';
@@ -15,12 +13,12 @@ const api = axios.create({
   baseURL: BASE_URL,
   params: {
     api_key: API_KEY,
-    language: 'pt-BR', // Localized for better UX (or en-US)
+    language: 'pt-BR',
   },
 });
 
-// Helper to check if key is missing
-export const isApiKeyMissing = () => API_KEY === "YOUR_TMDB_API_KEY_HERE";
+// Key is now hardcoded, so it's never missing in this context
+export const isApiKeyMissing = () => false;
 
 // -----------------------------------------------------------------------------
 // ENDPOINTS
