@@ -56,7 +56,7 @@ const Home: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center flex-col gap-4 text-center px-4">
-        <h2 className="text-3xl font-bold text-red-600">Erro na conexão</h2>
+        <h2 className="text-3xl font-bold text-cyan-500">Erro na conexão</h2>
         <p className="text-zinc-400 max-w-md">{error}</p>
       </div>
     );

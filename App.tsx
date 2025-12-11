@@ -27,7 +27,7 @@ const AnimatedRoutes: React.FC = () => {
 const App: React.FC = () => {
   return (
     <HashRouter>
-      <div className="min-h-screen bg-brand-dark text-zinc-100 font-sans selection:bg-red-600 selection:text-white">
+      <div className="min-h-screen bg-brand-dark text-zinc-100 font-sans selection:bg-cyan-500 selection:text-black">
         <Navbar />
         <main>
           <AnimatedRoutes />

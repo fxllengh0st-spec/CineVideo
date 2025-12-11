@@ -6,6 +6,22 @@ import MovieCard from '../components/MovieCard';
 import { motion } from 'framer-motion';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
+// Move configuration outside component to ensure reference stability
+const categoryConfig: Record<string, { title: string; fetcher: (page: number) => Promise<any> }> = {
+  trending: {
+      title: "Em Alta nesta Semana",
+      fetcher: getTrendingMovies
+  },
+  top_rated: {
+      title: "Aclamados pela Crítica",
+      fetcher: getTopRatedMovies
+  },
+  upcoming: {
+      title: "Chegando aos Cinemas",
+      fetcher: getUpcomingMovies
+  }
+};
+
 const CategoryPage: React.FC = () => {
   const { type } = useParams<{ type: string }>();
   
@@ -14,26 +30,10 @@ const CategoryPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
 
-  // Mapeamento de títulos e funções API
-  const categoryConfig: Record<string, { title: string; fetcher: (page: number) => Promise<any> }> = {
-    trending: {
-        title: "Em Alta nesta Semana",
-        fetcher: getTrendingMovies
-    },
-    top_rated: {
-        title: "Aclamados pela Crítica",
-        fetcher: getTopRatedMovies
-    },
-    upcoming: {
-        title: "Chegando aos Cinemas",
-        fetcher: getUpcomingMovies
-    }
-  };
-
   const currentCategory = type && categoryConfig[type] ? categoryConfig[type] : null;
 
   useEffect(() => {
-    // Reset page on category change
+    // Ensure page is 1 when type changes (though App.tsx keying might handle this, this is safe)
     setCurrentPage(1);
   }, [type]);
 
@@ -128,7 +128,7 @@ const CategoryPage: React.FC = () => {
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="p-3 rounded-full bg-zinc-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-600 transition-colors border border-white/5"
+                className="p-3 rounded-full bg-zinc-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-cyan-600 transition-colors border border-white/5"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -140,7 +140,7 @@ const CategoryPage: React.FC = () => {
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="p-3 rounded-full bg-zinc-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-600 transition-colors border border-white/5"
+                className="p-3 rounded-full bg-zinc-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-cyan-600 transition-colors border border-white/5"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>

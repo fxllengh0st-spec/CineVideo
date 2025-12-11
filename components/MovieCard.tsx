@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import { IMAGE_BASE_URL_W500 } from '../services/api';
@@ -10,31 +10,72 @@ interface MovieCardProps {
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
-  const [imageError, setImageError] = React.useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const cardRef = useRef<HTMLDivElement>(null);
 
   const posterUrl = !imageError && movie.poster_path
     ? `${IMAGE_BASE_URL_W500}${movie.poster_path}`
     : 'https://via.placeholder.com/500x750/18181b/a1a1aa?text=Sem+Imagem';
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsVisible(true);
+            observer.disconnect(); // Stop observing once visible to save resources
+          }
+        });
+      },
+      {
+        rootMargin: '100px', // Preload images 100px before they appear
+        threshold: 0.01,
+      }
+    );
+
+    if (cardRef.current) {
+      observer.observe(cardRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, []);
+
   return (
     <Link to={`/movie/${movie.id}`} className="group block relative w-full h-full">
       <motion.div 
+        ref={cardRef}
         className="aspect-[2/3] w-full overflow-hidden rounded-lg bg-zinc-900 shadow-lg ring-1 ring-white/10 relative"
         {...({
           whileHover: { scale: 1.05, y: -5, zIndex: 10 },
           transition: { duration: 0.3, ease: "easeOut" }
         } as any)}
       >
-        <img
-          src={posterUrl}
-          alt={movie.title}
-          onError={() => setImageError(true)}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110 group-hover:opacity-60"
-          loading="lazy"
+        {/* Placeholder / Skeleton Loader */}
+        <div 
+            className={`absolute inset-0 bg-zinc-800 animate-pulse transition-opacity duration-500 z-0 ${
+                isLoaded ? 'opacity-0' : 'opacity-100'
+            }`} 
         />
+
+        {isVisible && (
+            <img
+            src={posterUrl}
+            alt={movie.title}
+            onError={() => setImageError(true)}
+            onLoad={() => setIsLoaded(true)}
+            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:opacity-60 relative z-10 ${
+                isLoaded ? 'opacity-100' : 'opacity-0'
+            }`}
+            loading="lazy"
+            />
+        )}
         
-        {/* Hover Overlay Info - Gradient mais suave */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4 translate-y-4 group-hover:translate-y-0">
+        {/* Hover Overlay Info */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4 translate-y-4 group-hover:translate-y-0 z-20">
           <h3 className="text-white font-bold text-sm leading-tight mb-2 line-clamp-2">{movie.title}</h3>
           
           <div className="flex items-center justify-between text-xs text-zinc-300">
@@ -45,7 +86,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
             <span className="font-medium">{movie.release_date?.split('-')[0] || 'TBA'}</span>
           </div>
           
-          <div className="w-full mt-3 py-1.5 bg-red-600 text-white text-xs font-bold text-center rounded opacity-0 group-hover:opacity-100 transition-delay-100">
+          <div className="w-full mt-3 py-1.5 bg-cyan-600 text-white text-xs font-bold text-center rounded opacity-0 group-hover:opacity-100 transition-delay-100 shadow-lg shadow-cyan-900/50">
             Assistir Agora
           </div>
         </div>

@@ -105,7 +105,7 @@ const MovieDetails: React.FC = () => {
   }
 
   if (!movie) {
-    return <div className="min-h-screen flex items-center justify-center text-red-500">Filme não encontrado.</div>;
+    return <div className="min-h-screen flex items-center justify-center text-cyan-500">Filme não encontrado.</div>;
   }
 
   const backdropUrl = movie.backdrop_path
@@ -146,7 +146,7 @@ const MovieDetails: React.FC = () => {
                 <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center text-white mb-2 gap-4">
                     <div className="flex flex-col">
                         <h3 className="text-xl font-bold flex items-center gap-2">
-                           <Play className="w-5 h-5 text-red-600" />
+                           <Play className="w-5 h-5 text-cyan-400" />
                            <span className="truncate max-w-[200px] sm:max-w-md">{movie.title}</span>
                         </h3>
                         <span className="text-xs text-zinc-400">
@@ -175,7 +175,7 @@ const MovieDetails: React.FC = () => {
 
                         <button 
                             onClick={() => setShowPlayer(false)}
-                            className="p-2 bg-zinc-800 hover:bg-red-600 rounded-full text-white transition-colors border border-white/5"
+                            className="p-2 bg-zinc-800 hover:bg-cyan-600 rounded-full text-white transition-colors border border-white/5"
                         >
                             <X className="w-6 h-6" />
                         </button>
@@ -212,7 +212,7 @@ const MovieDetails: React.FC = () => {
                                     onClick={() => setSelectedServerIndex(index)}
                                     className={`px-3 py-1.5 rounded text-xs font-medium transition-all duration-200 border ${
                                         selectedServerIndex === index
-                                        ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-900/20 scale-105'
+                                        ? 'bg-cyan-600 border-cyan-500 text-white shadow-lg shadow-cyan-900/20 scale-105'
                                         : 'bg-zinc-800 border-white/5 text-zinc-400 hover:bg-zinc-700 hover:text-white'
                                     }`}
                                 >
@@ -329,7 +329,7 @@ const MovieDetails: React.FC = () => {
                     {isReleased ? (
                         <button 
                             onClick={() => setShowPlayer(true)}
-                            className="flex items-center gap-3 px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-md transition-all transform hover:scale-105 shadow-lg shadow-red-900/20 w-full sm:w-auto justify-center"
+                            className="flex items-center gap-3 px-8 py-3 bg-cyan-600 hover:bg-cyan-700 text-white font-bold rounded-md transition-all transform hover:scale-105 shadow-lg shadow-cyan-900/20 w-full sm:w-auto justify-center"
                         >
                             <Play className="w-5 h-5 fill-white" />
                             Assistir Filme
@@ -365,7 +365,7 @@ const MovieDetails: React.FC = () => {
           className="mt-16"
           {...({ variants: itemVariants } as any)}
         >
-            <h3 className="text-2xl font-bold text-white mb-6 border-l-4 border-red-600 pl-3">Elenco Principal</h3>
+            <h3 className="text-2xl font-bold text-white mb-6 border-l-4 border-cyan-400 pl-3">Elenco Principal</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {movie.credits?.cast.slice(0, 12).map((actor, index) => (
                     <motion.div 

@@ -22,13 +22,13 @@ const SectionSlider: React.FC<SectionSliderProps> = ({ title, movies, categoryPa
     <section className="py-8 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
       {/* Header da Seção */}
       <div className="flex items-end justify-between mb-6">
-        <h2 className="text-xl sm:text-2xl font-bold text-white tracking-wide border-l-4 border-red-600 pl-3">
+        <h2 className="text-xl sm:text-2xl font-bold text-white tracking-wide border-l-4 border-cyan-400 pl-3">
           {title}
         </h2>
         
         <Link 
           to={categoryPath}
-          className="group flex items-center gap-1 text-sm font-medium text-zinc-400 hover:text-white transition-colors"
+          className="group flex items-center gap-1 text-sm font-medium text-zinc-400 hover:text-cyan-400 transition-colors"
         >
           Ver tudo
           <ChevronRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

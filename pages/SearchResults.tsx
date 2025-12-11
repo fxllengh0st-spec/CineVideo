@@ -59,7 +59,7 @@ const SearchResults: React.FC = () => {
     >
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white">
-          Resultados para <span className="text-red-500">"{query}"</span>
+          Resultados para <span className="text-cyan-400">"{query}"</span>
         </h1>
         <p className="text-zinc-400 mt-2">
             {movies.length > 0 
@@ -105,7 +105,7 @@ const SearchResults: React.FC = () => {
               <button
                 onClick={() => handlePageChange(currentPage - 1)}
                 disabled={currentPage === 1}
-                className="p-3 rounded-full bg-zinc-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-600 transition-colors border border-white/5"
+                className="p-3 rounded-full bg-zinc-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-cyan-600 transition-colors border border-white/5"
               >
                 <ChevronLeft className="w-5 h-5" />
               </button>
@@ -117,7 +117,7 @@ const SearchResults: React.FC = () => {
               <button
                 onClick={() => handlePageChange(currentPage + 1)}
                 disabled={currentPage === totalPages}
-                className="p-3 rounded-full bg-zinc-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-red-600 transition-colors border border-white/5"
+                className="p-3 rounded-full bg-zinc-800 text-white disabled:opacity-50 disabled:cursor-not-allowed hover:bg-cyan-600 transition-colors border border-white/5"
               >
                 <ChevronRight className="w-5 h-5" />
               </button>
