@@ -18,8 +18,10 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
     <Link to={`/movie/${movie.id}`} className="group block relative">
       <motion.div 
         className="aspect-[2/3] w-full overflow-hidden rounded-md bg-zinc-800 shadow-xl ring-1 ring-white/5"
-        whileHover={{ scale: 1.05, zIndex: 10 }}
-        transition={{ duration: 0.3 }}
+        {...({
+          whileHover: { scale: 1.05, zIndex: 10 },
+          transition: { duration: 0.3 }
+        } as any)}
       >
         <img
           src={posterUrl}

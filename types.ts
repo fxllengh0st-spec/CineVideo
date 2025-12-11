@@ -12,6 +12,7 @@ export interface Cast {
 
 export interface Movie {
   id: number;
+  imdb_id?: string;
   title: string;
   overview: string;
   poster_path: string | null;

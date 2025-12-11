@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, IMAGE_BASE_URL_ORIGINAL, IMAGE_BASE_URL_W500 } from '../services/api';
 import { Movie } from '../types';
-import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X } from 'lucide-react';
+import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const containerVariants = {
@@ -77,22 +77,34 @@ const MovieDetails: React.FC = () => {
     ? `${IMAGE_BASE_URL_W500}${movie.poster_path}`
     : 'https://via.placeholder.com/500x750?text=No+Poster';
 
+  // Lógica de URL do Player: Prioriza IMDB, fallback para TMDB
+  const playerUrl = movie.imdb_id 
+    ? `https://vidsrc-embed.ru/embed/movie?imdb=${movie.imdb_id}&autoplay=1`
+    : `https://vidsrc-embed.ru/embed/movie?tmdb=${movie.id}&autoplay=1`;
+
+  // Verifica se o filme já foi lançado
+  const isReleased = new Date(movie.release_date) <= new Date();
+
   return (
     <motion.div 
       className="min-h-screen bg-zinc-950 pb-20"
-      variants={containerVariants}
-      initial="hidden"
-      animate="visible"
-      exit="exit"
+      {...({
+        variants: containerVariants,
+        initial: "hidden",
+        animate: "visible",
+        exit: "exit"
+      } as any)}
     >
       {/* Player Modal Overlay */}
       <AnimatePresence>
         {showPlayer && (
           <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
             className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-8"
+            {...({
+              initial: { opacity: 0 },
+              animate: { opacity: 1 },
+              exit: { opacity: 0 }
+            } as any)}
           >
             <div className="w-full max-w-7xl aspect-video bg-black relative shadow-2xl rounded-xl overflow-hidden ring-1 ring-white/10">
               <button 
@@ -102,11 +114,12 @@ const MovieDetails: React.FC = () => {
                 <X className="w-6 h-6" />
               </button>
               <iframe
-                src={`https://vidsrc-embed.ru/embed/movie?tmdb=${movie.id}&autoplay=1`}
+                src={playerUrl}
                 className="w-full h-full"
                 allowFullScreen
                 allow="autoplay; encrypted-media; picture-in-picture"
                 title={`Player: ${movie.title}`}
+                referrerPolicy="origin"
               ></iframe>
             </div>
           </motion.div>
@@ -114,7 +127,14 @@ const MovieDetails: React.FC = () => {
       </AnimatePresence>
 
       {/* Backdrop Header */}
-      <motion.div className="relative h-[60vh] sm:h-[70vh] w-full" initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 1 }}>
+      <motion.div 
+        className="relative h-[60vh] sm:h-[70vh] w-full"
+        {...({
+          initial: { opacity: 0 },
+          animate: { opacity: 1 },
+          transition: { duration: 1 }
+        } as any)}
+      >
         <div className="absolute inset-0">
             <img src={backdropUrl} alt={movie.title} className="w-full h-full object-cover" />
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
@@ -133,9 +153,11 @@ const MovieDetails: React.FC = () => {
             {/* Poster */}
             <motion.div 
               className="flex-shrink-0 mx-auto md:mx-0 w-64 sm:w-80 shadow-2xl rounded-lg overflow-hidden ring-1 ring-white/10 bg-zinc-900"
-              initial={{ y: 50, opacity: 0 }}
-              animate={{ y: 0, opacity: 1 }}
-              transition={{ delay: 0.3, duration: 0.6 }}
+              {...({
+                initial: { y: 50, opacity: 0 },
+                animate: { y: 0, opacity: 1 },
+                transition: { delay: 0.3, duration: 0.6 }
+              } as any)}
             >
                 <img src={posterUrl} alt={movie.title} className="w-full h-full object-cover" />
             </motion.div>
@@ -143,10 +165,18 @@ const MovieDetails: React.FC = () => {
             {/* Info */}
             <div className="flex-1 pt-4 md:pt-20 text-center md:text-left">
                 <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-                    <motion.h1 variants={itemVariants} className="text-4xl sm:text-5xl font-bold text-white mb-2 drop-shadow-lg">{movie.title}</motion.h1>
+                    <motion.h1 
+                      className="text-4xl sm:text-5xl font-bold text-white mb-2 drop-shadow-lg"
+                      {...({ variants: itemVariants } as any)}
+                    >
+                      {movie.title}
+                    </motion.h1>
                 </div>
                 
-                <motion.div variants={itemVariants} className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-zinc-300 mb-6 mt-2">
+                <motion.div 
+                  className="flex flex-wrap items-center justify-center md:justify-start gap-4 text-zinc-300 mb-6 mt-2"
+                  {...({ variants: itemVariants } as any)}
+                >
                     <span className="flex items-center gap-1 text-yellow-500 font-bold bg-yellow-500/10 px-2 py-1 rounded">
                         <Star className="w-4 h-4 fill-yellow-500" />
                         {movie.vote_average.toFixed(1)}
@@ -164,7 +194,10 @@ const MovieDetails: React.FC = () => {
                 </motion.div>
 
                 {/* Genres */}
-                <motion.div variants={itemVariants} className="flex flex-wrap justify-center md:justify-start gap-2 mb-8">
+                <motion.div 
+                  className="flex flex-wrap justify-center md:justify-start gap-2 mb-8"
+                  {...({ variants: itemVariants } as any)}
+                >
                     {movie.genres?.map(genre => (
                         <span key={genre.id} className="text-xs font-medium text-white/80 bg-white/10 border border-white/5 px-3 py-1 rounded-full">
                             {genre.name}
@@ -173,14 +206,24 @@ const MovieDetails: React.FC = () => {
                 </motion.div>
 
                 {/* Action Buttons */}
-                <motion.div variants={itemVariants} className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 mb-8">
-                    <button 
-                        onClick={() => setShowPlayer(true)}
-                        className="flex items-center gap-3 px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-md transition-all transform hover:scale-105 shadow-lg shadow-red-900/20 w-full sm:w-auto justify-center"
-                    >
-                        <Play className="w-5 h-5 fill-white" />
-                        Assistir Filme
-                    </button>
+                <motion.div 
+                  className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 mb-8"
+                  {...({ variants: itemVariants } as any)}
+                >
+                    {isReleased ? (
+                        <button 
+                            onClick={() => setShowPlayer(true)}
+                            className="flex items-center gap-3 px-8 py-3 bg-red-600 hover:bg-red-700 text-white font-bold rounded-md transition-all transform hover:scale-105 shadow-lg shadow-red-900/20 w-full sm:w-auto justify-center"
+                        >
+                            <Play className="w-5 h-5 fill-white" />
+                            Assistir Filme
+                        </button>
+                    ) : (
+                        <div className="flex items-center gap-3 px-8 py-3 bg-zinc-800 text-zinc-400 font-bold rounded-md w-full sm:w-auto justify-center cursor-not-allowed border border-white/5">
+                            <AlertCircle className="w-5 h-5" />
+                            Ainda não lançado
+                        </div>
+                    )}
 
                     <button
                         onClick={handleShare}
@@ -191,7 +234,10 @@ const MovieDetails: React.FC = () => {
                     </button>
                 </motion.div>
 
-                <motion.div variants={itemVariants} className="space-y-4 max-w-3xl">
+                <motion.div 
+                  className="space-y-4 max-w-3xl"
+                  {...({ variants: itemVariants } as any)}
+                >
                     <h3 className="text-xl font-semibold text-white">Sinopse</h3>
                     <p className="text-zinc-300 leading-relaxed text-lg">{movie.overview || "Nenhuma sinopse disponível."}</p>
                 </motion.div>
@@ -199,17 +245,22 @@ const MovieDetails: React.FC = () => {
         </div>
 
         {/* Cast Section */}
-        <motion.div variants={itemVariants} className="mt-16">
+        <motion.div 
+          className="mt-16"
+          {...({ variants: itemVariants } as any)}
+        >
             <h3 className="text-2xl font-bold text-white mb-6 border-l-4 border-red-600 pl-3">Elenco Principal</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                 {movie.credits?.cast.slice(0, 12).map((actor, index) => (
                     <motion.div 
                       key={actor.id} 
                       className="bg-zinc-900 rounded-lg overflow-hidden group"
-                      initial={{ opacity: 0, y: 20 }}
-                      whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }}
-                      transition={{ delay: index * 0.05 }}
+                      {...({
+                        initial: { opacity: 0, y: 20 },
+                        whileInView: { opacity: 1, y: 0 },
+                        viewport: { once: true },
+                        transition: { delay: index * 0.05 }
+                      } as any)}
                     >
                         <div className="aspect-[2/3] overflow-hidden">
                             {actor.profile_path ? (

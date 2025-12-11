@@ -27,9 +27,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ movie }) => {
       {/* Background Image */}
       <motion.div 
         className="absolute inset-0"
-        initial={{ scale: 1.1, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ duration: 1.5 }}
+        {...({
+          initial: { scale: 1.1, opacity: 0 },
+          animate: { scale: 1, opacity: 1 },
+          transition: { duration: 1.5 }
+        } as any)}
       >
         <img
           src={backgroundUrl}
@@ -46,9 +48,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ movie }) => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-20">
           <motion.div 
             className="max-w-2xl space-y-6"
-            initial={{ opacity: 0, x: -50 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5, duration: 0.8 }}
+            {...({
+              initial: { opacity: 0, x: -50 },
+              animate: { opacity: 1, x: 0 },
+              transition: { delay: 0.5, duration: 0.8 }
+            } as any)}
           >
             <h1 className="text-4xl sm:text-6xl font-black text-white leading-tight drop-shadow-lg">
               {movie.title}
@@ -67,9 +71,11 @@ const HeroSection: React.FC<HeroSectionProps> = ({ movie }) => {
 
             <motion.div 
               className="flex items-center gap-4 pt-4"
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 1, duration: 0.5 }}
+              {...({
+                initial: { opacity: 0, y: 20 },
+                animate: { opacity: 1, y: 0 },
+                transition: { delay: 1, duration: 0.5 }
+              } as any)}
             >
               <Link 
                 to={`/movie/${movie.id}`}

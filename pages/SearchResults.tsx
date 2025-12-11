@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { searchMovies } from '../services/api';
 import { Movie } from '../types';
 import MovieCard from '../components/MovieCard';
 import { motion } from 'framer-motion';
 
 const SearchResults: React.FC = () => {
-  const [searchParams] = useSearchParams();
-  const query = searchParams.get('q');
+  const location = useLocation();
+  const query = new URLSearchParams(location.search).get('q');
+  
   const [movies, setMovies] = useState<Movie[]>([]);
   const [loading, setLoading] = useState(false);
 
@@ -31,10 +32,12 @@ const SearchResults: React.FC = () => {
   return (
     <motion.div 
       className="min-h-screen pt-24 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
-      initial={{ opacity: 0, x: -20 }}
-      animate={{ opacity: 1, x: 0 }}
-      exit={{ opacity: 0, x: 20 }}
-      transition={{ duration: 0.4 }}
+      {...({
+        initial: { opacity: 0, x: -20 },
+        animate: { opacity: 1, x: 0 },
+        exit: { opacity: 0, x: 20 },
+        transition: { duration: 0.4 }
+      } as any)}
     >
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white">
@@ -56,15 +59,22 @@ const SearchResults: React.FC = () => {
       ) : (
         <motion.div 
           className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"
-          initial="hidden"
-          animate="visible"
-          variants={{
-            hidden: { opacity: 0 },
-            visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
-          }}
+          {...({
+            initial: "hidden",
+            animate: "visible",
+            variants: {
+              hidden: { opacity: 0 },
+              visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+            }
+          } as any)}
         >
           {movies.map((movie) => (
-            <motion.div key={movie.id} variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+            <motion.div 
+              key={movie.id} 
+              {...({
+                variants: { hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }
+              } as any)}
+            >
                <MovieCard movie={movie} />
             </motion.div>
           ))}
