@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Star } from 'lucide-react';
 import { IMAGE_BASE_URL_W500 } from '../services/api';
 import { Movie } from '../types';
+import { motion } from 'framer-motion';
 
 interface MovieCardProps {
   movie: Movie;
@@ -15,7 +16,11 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
 
   return (
     <Link to={`/movie/${movie.id}`} className="group block relative">
-      <div className="aspect-[2/3] w-full overflow-hidden rounded-md bg-zinc-800 shadow-xl transition-all duration-300 group-hover:scale-105 group-hover:z-10 group-hover:shadow-2xl ring-1 ring-white/5">
+      <motion.div 
+        className="aspect-[2/3] w-full overflow-hidden rounded-md bg-zinc-800 shadow-xl ring-1 ring-white/5"
+        whileHover={{ scale: 1.05, zIndex: 10 }}
+        transition={{ duration: 0.3 }}
+      >
         <img
           src={posterUrl}
           alt={movie.title}
@@ -34,7 +39,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
             <span>{movie.release_date?.split('-')[0]}</span>
           </div>
         </div>
-      </div>
+      </motion.div>
     </Link>
   );
 };

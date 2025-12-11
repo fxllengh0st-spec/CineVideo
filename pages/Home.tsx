@@ -3,6 +3,7 @@ import { getTrendingMovies, getTopRatedMovies, getUpcomingMovies, isApiKeyMissin
 import { Movie } from '../types';
 import HeroSection from '../components/HeroSection';
 import SectionSlider from '../components/SectionSlider';
+import { motion } from 'framer-motion';
 
 const Home: React.FC = () => {
   const [trending, setTrending] = useState<Movie[]>([]);
@@ -74,15 +75,44 @@ const Home: React.FC = () => {
     : null;
 
   return (
-    <div className="pb-20">
+    <motion.div 
+      className="pb-20"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: 0.5 }}
+    >
       <HeroSection movie={heroMovie} />
       
       <div className="-mt-32 relative z-10 space-y-4">
-        <SectionSlider title="Em Alta nesta Semana" movies={trending} />
-        <SectionSlider title="Aclamados pela Crítica" movies={topRated} />
-        <SectionSlider title="Chegando aos Cinemas" movies={upcoming} />
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6, delay: 0.1 }}
+        >
+          <SectionSlider title="Em Alta nesta Semana" movies={trending} />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6, delay: 0.2 }}
+        >
+          <SectionSlider title="Aclamados pela Crítica" movies={topRated} />
+        </motion.div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: "-50px" }}
+          transition={{ duration: 0.6, delay: 0.3 }}
+        >
+          <SectionSlider title="Chegando aos Cinemas" movies={upcoming} />
+        </motion.div>
       </div>
-    </div>
+    </motion.div>
   );
 };
 

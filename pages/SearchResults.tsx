@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { searchMovies } from '../services/api';
 import { Movie } from '../types';
 import MovieCard from '../components/MovieCard';
+import { motion } from 'framer-motion';
 
 const SearchResults: React.FC = () => {
   const [searchParams] = useSearchParams();
@@ -28,7 +29,13 @@ const SearchResults: React.FC = () => {
   }, [query]);
 
   return (
-    <div className="min-h-screen pt-24 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <motion.div 
+      className="min-h-screen pt-24 pb-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8"
+      initial={{ opacity: 0, x: -20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: 20 }}
+      transition={{ duration: 0.4 }}
+    >
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white">
           Resultados para <span className="text-red-500">"{query}"</span>
@@ -47,13 +54,23 @@ const SearchResults: React.FC = () => {
              ))}
         </div>
       ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+        <motion.div 
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { staggerChildren: 0.05 } }
+          }}
+        >
           {movies.map((movie) => (
-            <MovieCard key={movie.id} movie={movie} />
+            <motion.div key={movie.id} variants={{ hidden: { opacity: 0, y: 20 }, visible: { opacity: 1, y: 0 } }}>
+               <MovieCard movie={movie} />
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       )}
-    </div>
+    </motion.div>
   );
 };
 

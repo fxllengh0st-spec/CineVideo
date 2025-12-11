@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { Play, Info } from 'lucide-react';
 import { IMAGE_BASE_URL_ORIGINAL } from '../services/api';
 import { Movie } from '../types';
+import { motion } from 'framer-motion';
 
 interface HeroSectionProps {
   movie: Movie | null;
@@ -24,7 +25,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ movie }) => {
   return (
     <div className="relative h-[85vh] w-full overflow-hidden">
       {/* Background Image */}
-      <div className="absolute inset-0">
+      <motion.div 
+        className="absolute inset-0"
+        initial={{ scale: 1.1, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ duration: 1.5 }}
+      >
         <img
           src={backgroundUrl}
           alt={movie.title}
@@ -33,12 +39,17 @@ const HeroSection: React.FC<HeroSectionProps> = ({ movie }) => {
         {/* Gradients for text readability */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent bottom-0 h-full" />
-      </div>
+      </motion.div>
 
       {/* Content */}
       <div className="absolute inset-0 flex items-center">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full pt-20">
-          <div className="max-w-2xl space-y-6 animate-fade-in-up">
+          <motion.div 
+            className="max-w-2xl space-y-6"
+            initial={{ opacity: 0, x: -50 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.5, duration: 0.8 }}
+          >
             <h1 className="text-4xl sm:text-6xl font-black text-white leading-tight drop-shadow-lg">
               {movie.title}
             </h1>
@@ -54,7 +65,12 @@ const HeroSection: React.FC<HeroSectionProps> = ({ movie }) => {
               {movie.overview}
             </p>
 
-            <div className="flex items-center gap-4 pt-4">
+            <motion.div 
+              className="flex items-center gap-4 pt-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1, duration: 0.5 }}
+            >
               <Link 
                 to={`/movie/${movie.id}`}
                 className="flex items-center gap-2 bg-white text-black px-6 py-3 rounded font-bold hover:bg-zinc-200 transition-colors"
@@ -69,8 +85,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ movie }) => {
                 <Info className="w-5 h-5" />
                 Mais Informações
               </Link>
-            </div>
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </div>
     </div>
