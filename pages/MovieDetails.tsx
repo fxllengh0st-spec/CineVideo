@@ -22,27 +22,27 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
 };
 
-// Configuração dos Servidores - Priorizando conteúdo PT-BR e estabilidade
+// Configuração dos Servidores - Priorizando estabilidade e suporte a PT-BR
 const SERVER_LIST = [
     { 
-        name: 'Opção 1 (SuperFlix - PT-BR)', 
-        getUrl: (tmdb: number, imdb?: string) => `https://superflixapi.top/filme/${tmdb}` 
-    },
-    { 
-        name: 'Opção 2 (MultiEmbed - PT-BR)', 
+        name: 'Opção 1 (Principal - PT-BR)', 
         getUrl: (tmdb: number, imdb?: string) => `https://multiembed.mov/?video_id=${tmdb}&tmdb=1&lang=pt` 
     },
     { 
-        name: 'Opção 3 (VidSrc - Estável)', 
+        name: 'Opção 2 (Embed.su - HD)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://embed.su/embed/movie/${tmdb}` 
+    },
+    { 
+        name: 'Opção 3 (VidSrc - Leg/Dub)', 
         getUrl: (tmdb: number, imdb?: string) => `https://vidsrc.xyz/embed/movie/${tmdb}?ds_lang=pt` 
     },
     { 
-        name: 'Opção 4 (VidLink - Rápido)', 
-        getUrl: (tmdb: number, imdb?: string) => `https://vidlink.pro/movie/${tmdb}` 
+        name: 'Opção 4 (AutoEmbed)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://player.autoembed.cc/embed/movie/${tmdb}` 
     },
     { 
-        name: 'Opção 5 (Embedder)', 
-        getUrl: (tmdb: number, imdb?: string) => `https://embedder.net/e/movie?tmdb=${tmdb}` 
+        name: 'Opção 5 (VidLink)', 
+        getUrl: (tmdb: number, imdb?: string) => `https://vidlink.pro/movie/${tmdb}` 
     }
 ];
 
@@ -230,8 +230,8 @@ const MovieDetails: React.FC = () => {
                                 Preferência de Áudio (Dublado/Legendado)
                             </p>
                             <p className="opacity-80 leading-relaxed">
-                                A <b>Opção 1</b> e <b>2</b> priorizam áudio em Português. <br/>
-                                Caso a opção selecionada falhe, tente as próximas da lista. Players gratuitos podem ter instabilidade momentânea.
+                                A <b>Opção 1</b> tenta carregar áudio em Português automaticamente. <br/>
+                                Nas demais opções (Embed.su, VidSrc), procure pelo ícone de <b>Engrenagem</b> ou <b>Bandeira</b> dentro do player para alternar o áudio/legenda.
                             </p>
                         </div>
                     </div>
