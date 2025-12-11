@@ -67,7 +67,7 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
             alt={movie.title}
             onError={() => setImageError(true)}
             onLoad={() => setIsLoaded(true)}
-            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:opacity-60 relative z-10 ${
+            className={`w-full h-full object-cover transition-all duration-500 group-hover:scale-110 group-hover:brightness-40 relative z-10 ${
                 isLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             loading="lazy"
@@ -75,18 +75,24 @@ const MovieCard: React.FC<MovieCardProps> = ({ movie }) => {
         )}
         
         {/* Hover Overlay Info */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4 translate-y-4 group-hover:translate-y-0 z-20">
-          <h3 className="text-white font-bold text-sm leading-tight mb-2 line-clamp-2">{movie.title}</h3>
+        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex flex-col justify-end p-4 translate-y-4 group-hover:translate-y-0 z-20">
+          <h3 className="text-white font-bold text-sm leading-tight mb-2 line-clamp-2 drop-shadow-md">{movie.title}</h3>
           
-          <div className="flex items-center justify-between text-xs text-zinc-300">
-            <span className="flex items-center gap-1 text-yellow-500 font-medium bg-black/50 px-2 py-0.5 rounded-full backdrop-blur-sm">
+          <div className="flex items-center justify-between text-xs text-zinc-300 mb-3">
+            <span className="flex items-center gap-1 text-yellow-500 font-medium bg-black/50 px-2 py-0.5 rounded-full backdrop-blur-sm border border-white/10">
               <Star className="w-3 h-3 fill-yellow-500" />
               {movie.vote_average.toFixed(1)}
             </span>
-            <span className="font-medium">{movie.release_date?.split('-')[0] || 'TBA'}</span>
+            <span className="font-medium bg-black/30 px-2 py-0.5 rounded border border-white/5">
+                {movie.release_date?.split('-')[0] || 'TBA'}
+            </span>
           </div>
+
+          <p className="text-[11px] text-zinc-300 line-clamp-3 mb-4 leading-relaxed opacity-0 group-hover:opacity-100 transition-opacity duration-500 delay-75">
+            {movie.overview || "Sinopse não disponível."}
+          </p>
           
-          <div className="w-full mt-3 py-1.5 bg-cyan-600 text-white text-xs font-bold text-center rounded opacity-0 group-hover:opacity-100 transition-delay-100 shadow-lg shadow-cyan-900/50">
+          <div className="w-full py-2 bg-cyan-600 hover:bg-cyan-500 text-white text-xs font-bold text-center rounded transition-colors shadow-lg shadow-cyan-900/50">
             Assistir Agora
           </div>
         </div>

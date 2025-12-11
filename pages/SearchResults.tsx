@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { searchMovies } from '../services/api';
 import { Movie } from '../types';
 import MovieCard from '../components/MovieCard';
 import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 
 const SearchResults: React.FC = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const query = new URLSearchParams(location.search).get('q');
   
   const [movies, setMovies] = useState<Movie[]>([]);
@@ -58,10 +59,19 @@ const SearchResults: React.FC = () => {
       } as any)}
     >
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-white">
-          Resultados para <span className="text-cyan-400">"{query}"</span>
-        </h1>
-        <p className="text-zinc-400 mt-2">
+        <div className="flex items-center gap-4 mb-2">
+            <button 
+                onClick={() => navigate(-1)}
+                className="p-2 rounded-full bg-zinc-800 hover:bg-zinc-700 text-zinc-300 hover:text-white transition-colors border border-white/5"
+                title="Voltar"
+            >
+                <ArrowLeft className="w-5 h-5" />
+            </button>
+            <h1 className="text-3xl font-bold text-white">
+            Resultados para <span className="text-cyan-400">"{query}"</span>
+            </h1>
+        </div>
+        <p className="text-zinc-400 mt-2 pl-14">
             {movies.length > 0 
                 ? `Página ${currentPage} de ${totalPages}.` 
                 : loading ? 'Pesquisando...' : 'Nenhum filme encontrado.'}

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getMovieDetails, IMAGE_BASE_URL_ORIGINAL, IMAGE_BASE_URL_W500 } from '../services/api';
 import { Movie } from '../types';
 import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X, AlertCircle, Server, RefreshCw, ExternalLink, Volume2 } from 'lucide-react';
@@ -48,6 +48,7 @@ const SERVER_LIST = [
 
 const MovieDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
@@ -255,10 +256,13 @@ const MovieDetails: React.FC = () => {
             <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/60 to-transparent" />
         </div>
         
-        <Link to="/" className="absolute top-24 left-4 sm:left-8 z-20 flex items-center gap-2 text-white/80 hover:text-white transition-colors">
-            <ArrowLeft className="w-6 h-6" />
+        <button 
+            onClick={() => navigate(-1)} 
+            className="absolute top-24 left-4 sm:left-8 z-20 flex items-center gap-2 text-white/80 hover:text-white transition-colors bg-black/20 hover:bg-black/40 backdrop-blur-sm px-4 py-2 rounded-full border border-white/5 group"
+        >
+            <ArrowLeft className="w-6 h-6 group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Voltar</span>
-        </Link>
+        </button>
       </motion.div>
 
       {/* Main Content Content */}
