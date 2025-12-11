@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, IMAGE_BASE_URL_ORIGINAL, IMAGE_BASE_URL_W500 } from '../services/api';
 import { Movie } from '../types';
-import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X, AlertCircle, ShieldAlert } from 'lucide-react';
+import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X, AlertCircle, ShieldAlert, Server } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const containerVariants = {
@@ -22,12 +22,27 @@ const itemVariants = {
   visible: { opacity: 1, y: 0, transition: { duration: 0.5 } }
 };
 
+// Configuração dos Servidores
+const SERVER_LIST = [
+    { name: 'Principal (Embed.su)', getUrl: (id: number, imdb?: string) => `https://embed.su/embed/movie/${id}` },
+    { name: 'VidSrc.to', getUrl: (id: number, imdb?: string) => `https://vidsrc.to/embed/movie/${id}` },
+    { name: 'VidLink', getUrl: (id: number, imdb?: string) => `https://vidlink.pro/movie/${id}` },
+    { name: 'VidSrc.me', getUrl: (id: number, imdb?: string) => `https://vidsrc.me/embed/movie/${id}` },
+    { name: 'VidSrc.cc', getUrl: (id: number, imdb?: string) => `https://vidsrc.cc/v2/embed/movie/${id}` },
+    { name: 'AutoEmbed', getUrl: (id: number, imdb?: string) => `https://autoembed.cc/embed/movie/${id}` },
+    { name: 'VidSrc.dev', getUrl: (id: number, imdb?: string) => `https://vidsrc.dev/embed/movie/${id}` },
+    { name: 'VidSrc.icu', getUrl: (id: number, imdb?: string) => `https://vidsrc.icu/embed/movie/${id}` },
+];
+
 const MovieDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [movie, setMovie] = useState<Movie | null>(null);
   const [loading, setLoading] = useState(true);
   const [copied, setCopied] = useState(false);
   const [showPlayer, setShowPlayer] = useState(false);
+  
+  // Estado para controlar qual servidor está selecionado (Índice do array SERVER_LIST)
+  const [selectedServerIndex, setSelectedServerIndex] = useState(0);
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -47,7 +62,6 @@ const MovieDetails: React.FC = () => {
 
     fetchDetails();
     
-    // Cleanup title on unmount
     return () => {
         document.title = 'CineVerse - Discover Your Next Story';
     };
@@ -77,11 +91,10 @@ const MovieDetails: React.FC = () => {
     ? `${IMAGE_BASE_URL_W500}${movie.poster_path}`
     : 'https://via.placeholder.com/500x750?text=No+Poster';
 
-  // ALTERAÇÃO: Uso do SuperEmbed. Ele é mais estável e tem menos popups agressivos.
-  // Utiliza o ID do TMDB diretamente.
-  const playerUrl = `https://superembed.stream/movie/${movie.id}`;
+  // Gera a URL baseada no servidor selecionado
+  const currentServer = SERVER_LIST[selectedServerIndex];
+  const playerUrl = currentServer.getUrl(movie.id, movie.imdb_id);
 
-  // Verifica se o filme já foi lançado
   const isReleased = new Date(movie.release_date) <= new Date();
 
   return (
@@ -98,43 +111,72 @@ const MovieDetails: React.FC = () => {
       <AnimatePresence>
         {showPlayer && (
           <motion.div 
-            className="fixed inset-0 z-[60] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 sm:p-8"
+            className="fixed inset-0 z-[60] bg-black/95 backdrop-blur-md flex flex-col items-center justify-center p-4 sm:p-6"
             {...({
               initial: { opacity: 0 },
               animate: { opacity: 1 },
               exit: { opacity: 0 }
             } as any)}
           >
-            <div className="w-full max-w-7xl flex flex-col gap-2">
-                <div className="w-full aspect-video bg-black relative shadow-2xl rounded-xl overflow-hidden ring-1 ring-white/10">
-                <button 
-                    onClick={() => setShowPlayer(false)}
-                    className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:bg-red-600 rounded-full text-white transition-all transform hover:scale-110"
-                >
-                    <X className="w-6 h-6" />
-                </button>
-                
-                {/* 
-                   SANDBOX FIX: 
-                   - allow-scripts: Necessário para o player funcionar.
-                   - allow-same-origin: Necessário para carregar recursos.
-                   - allow-forms: Necessário para controles.
-                   - allow-popups: Necessário, pois players gratuitos exigem popups para iniciar o vídeo.
-                   - IMPORTANTE: 'allow-top-navigation' foi REMOVIDO. Isso impede que o iframe redirecione a página inteira.
-                */}
-                <iframe
-                    src={playerUrl}
-                    className="w-full h-full"
-                    allowFullScreen
-                    sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-popups"
-                    allow="autoplay; encrypted-media; picture-in-picture"
-                    title={`Player: ${movie.title}`}
-                    referrerPolicy="origin"
-                ></iframe>
+            <div className="w-full max-w-6xl flex flex-col gap-4 relative">
+                {/* Header do Player */}
+                <div className="flex justify-between items-center text-white mb-2">
+                    <div className="flex flex-col">
+                        <h3 className="text-xl font-bold flex items-center gap-2">
+                           <Play className="w-5 h-5 text-red-600" />
+                           Assistindo: {movie.title}
+                        </h3>
+                        <span className="text-xs text-zinc-400">Servidor Atual: <span className="text-white font-semibold">{currentServer.name}</span></span>
+                    </div>
+                    <button 
+                        onClick={() => setShowPlayer(false)}
+                        className="p-2 bg-zinc-800 hover:bg-red-600 rounded-full text-white transition-colors"
+                    >
+                        <X className="w-6 h-6" />
+                    </button>
                 </div>
-                <div className="flex items-center justify-center gap-2 text-zinc-500 text-xs mt-2 bg-black/40 p-2 rounded-full mx-auto w-fit">
+
+                {/* Área do Iframe */}
+                <div className="w-full aspect-video bg-black relative shadow-2xl rounded-xl overflow-hidden ring-1 ring-white/10">
+                    <iframe
+                        key={playerUrl} // Força reload do iframe ao mudar URL
+                        src={playerUrl}
+                        className="w-full h-full"
+                        allowFullScreen
+                        // Sandbox configurado para permitir execução mas bloquear redirecionamento de página (top-navigation)
+                        sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-popups"
+                        allow="autoplay; encrypted-media; picture-in-picture"
+                        title={`Player: ${movie.title}`}
+                        referrerPolicy="origin"
+                    ></iframe>
+                </div>
+
+                {/* Seletor de Servidores */}
+                <div className="bg-zinc-900/80 p-4 rounded-lg border border-white/5">
+                    <div className="flex items-center gap-2 mb-3 text-zinc-400 text-sm">
+                        <Server className="w-4 h-4" />
+                        <span>Opções de Player (Se um falhar, tente outro):</span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                        {SERVER_LIST.map((server, index) => (
+                            <button
+                                key={server.name}
+                                onClick={() => setSelectedServerIndex(index)}
+                                className={`px-4 py-2 rounded text-xs sm:text-sm font-medium transition-all duration-200 border ${
+                                    selectedServerIndex === index
+                                    ? 'bg-red-600 border-red-500 text-white shadow-lg shadow-red-900/20 scale-105'
+                                    : 'bg-zinc-800 border-white/5 text-zinc-400 hover:bg-zinc-700 hover:text-white'
+                                }`}
+                            >
+                                {server.name}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="flex items-center justify-center gap-2 text-zinc-600 text-xs text-center mt-2">
                     <ShieldAlert className="w-3 h-3" />
-                    <span>Se abrir abas de propaganda, basta fechá-las para assistir.</span>
+                    <span>Nota: O conteúdo é fornecido por terceiros. Feche anúncios pop-up para iniciar o vídeo.</span>
                 </div>
             </div>
           </motion.div>
