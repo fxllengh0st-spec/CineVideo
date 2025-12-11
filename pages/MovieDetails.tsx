@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getMovieDetails, IMAGE_BASE_URL_ORIGINAL, IMAGE_BASE_URL_W500 } from '../services/api';
 import { Movie } from '../types';
-import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X, AlertCircle } from 'lucide-react';
+import { Star, Clock, Calendar, ArrowLeft, Share2, Check, Play, X, AlertCircle, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const containerVariants = {
@@ -77,10 +77,9 @@ const MovieDetails: React.FC = () => {
     ? `${IMAGE_BASE_URL_W500}${movie.poster_path}`
     : 'https://via.placeholder.com/500x750?text=No+Poster';
 
-  // Lógica de URL do Player: Prioriza IMDB, fallback para TMDB
-  const playerUrl = movie.imdb_id 
-    ? `https://vidsrc-embed.ru/embed/movie?imdb=${movie.imdb_id}&autoplay=1`
-    : `https://vidsrc-embed.ru/embed/movie?tmdb=${movie.id}&autoplay=1`;
+  // ALTERAÇÃO: Uso do SuperEmbed. Ele é mais estável e tem menos popups agressivos.
+  // Utiliza o ID do TMDB diretamente.
+  const playerUrl = `https://superembed.stream/movie/${movie.id}`;
 
   // Verifica se o filme já foi lançado
   const isReleased = new Date(movie.release_date) <= new Date();
@@ -106,21 +105,37 @@ const MovieDetails: React.FC = () => {
               exit: { opacity: 0 }
             } as any)}
           >
-            <div className="w-full max-w-7xl aspect-video bg-black relative shadow-2xl rounded-xl overflow-hidden ring-1 ring-white/10">
-              <button 
-                onClick={() => setShowPlayer(false)}
-                className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:bg-red-600 rounded-full text-white transition-all transform hover:scale-110"
-              >
-                <X className="w-6 h-6" />
-              </button>
-              <iframe
-                src={playerUrl}
-                className="w-full h-full"
-                allowFullScreen
-                allow="autoplay; encrypted-media; picture-in-picture"
-                title={`Player: ${movie.title}`}
-                referrerPolicy="origin"
-              ></iframe>
+            <div className="w-full max-w-7xl flex flex-col gap-2">
+                <div className="w-full aspect-video bg-black relative shadow-2xl rounded-xl overflow-hidden ring-1 ring-white/10">
+                <button 
+                    onClick={() => setShowPlayer(false)}
+                    className="absolute top-4 right-4 z-20 p-2 bg-black/50 hover:bg-red-600 rounded-full text-white transition-all transform hover:scale-110"
+                >
+                    <X className="w-6 h-6" />
+                </button>
+                
+                {/* 
+                   SANDBOX FIX: 
+                   - allow-scripts: Necessário para o player funcionar.
+                   - allow-same-origin: Necessário para carregar recursos.
+                   - allow-forms: Necessário para controles.
+                   - allow-popups: Necessário, pois players gratuitos exigem popups para iniciar o vídeo.
+                   - IMPORTANTE: 'allow-top-navigation' foi REMOVIDO. Isso impede que o iframe redirecione a página inteira.
+                */}
+                <iframe
+                    src={playerUrl}
+                    className="w-full h-full"
+                    allowFullScreen
+                    sandbox="allow-forms allow-pointer-lock allow-same-origin allow-scripts allow-popups"
+                    allow="autoplay; encrypted-media; picture-in-picture"
+                    title={`Player: ${movie.title}`}
+                    referrerPolicy="origin"
+                ></iframe>
+                </div>
+                <div className="flex items-center justify-center gap-2 text-zinc-500 text-xs mt-2 bg-black/40 p-2 rounded-full mx-auto w-fit">
+                    <ShieldAlert className="w-3 h-3" />
+                    <span>Se abrir abas de propaganda, basta fechá-las para assistir.</span>
+                </div>
             </div>
           </motion.div>
         )}
